@@ -1,0 +1,52 @@
+version: "3.8"
+services:
+  server_prod:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - DATABASE_URL=postgres://postgres:password@db:5432/mydatabaseprod
+    volumes:
+      - ./src:/usr/src/app/src
+    depends_on:
+      - db_prod
+    networks:
+      - backend  
+
+  db_prod:
+    image: postgres:15-alpine
+    container_name: postgres_prod
+    ports:
+      - "5433:5433"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=mydatabaseprod
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  nginx_prod:
+    image: nginx:alpine
+    container_name: nginx_prod
+    ports:
+      - "81:81" # Expose Nginx on port 80
+    volumes:
+      - ./nginx.prod.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - server_prod
+    networks:
+      - backend
+    restart: always
+
+volumes:
+  postgres_data_prod:
+
+networks:
+  backend:
+    driver: bridge
