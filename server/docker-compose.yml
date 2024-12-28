@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3000"
     environment:
       - PORT=3000
       - NODE_ENV=development
@@ -15,7 +15,10 @@ services:
     depends_on:
       - db
     networks:
-      - backend  
+      - backend
+     # Scale the server service
+    deploy:
+      replicas: 3  # You can increase this number based on your requirements    
 
   db:
     image: postgres:15-alpine
